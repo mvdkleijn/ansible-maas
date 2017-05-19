@@ -1,3 +1,7 @@
+# 2.0.1
+
+Only return machines that are in "Deployed" status to Ansible. - Thanks @v92
+
 # 2.0.0
 
 Reworked some of the code, added extra features and made compatibility changes

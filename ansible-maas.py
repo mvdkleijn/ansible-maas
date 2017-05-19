@@ -19,7 +19,7 @@ See https://docs.ubuntu.com/maas/2.1/en/api for API details
 :copyright: Martijn van der kleijn, 2017
 :author: Martijn van der Kleijn <mailto:martijn.niji@gmail.com>
 :license: Released under the Apache 2.0 License. See LICENSE for details.
-:version: 2.0.0
+:version: 2.0.1
 :date: 11 May 2017
 """
 
