@@ -128,11 +128,12 @@ class Inventory:
             group_name = tag
             hosts = []
             for server in response:
-                hosts.append(server['fqdn'])
-                ansible[group_name] = {
-                    "hosts": hosts,
-                    "vars": {}
-                }
+                if server['status_name'] == 'Deployed':
+                    hosts.append(server['fqdn'])
+                    ansible[group_name] = {
+                        "hosts": hosts,
+                        "vars": {}
+                    }
         # PS 2015-09-03: Create metadata block for Ansible's Dynamic Inventory
         # The below code gets a dump of ALL nodes in MAAS and then builds out a _meta JSON attribute.
         # node_dump = self.nodes()
