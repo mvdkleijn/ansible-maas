@@ -150,7 +150,7 @@ class Inventory:
            zone = node['zone']['name']
            if node['node_type_name'] != 'Machine' or node['status_name'] != 'Deployed':
              continue
-           hosts.append(node['hostname'])
+           hosts.append(node['fqdn'])
            ansible[zone] = {
                 "hosts": hosts,       
                 "vars": {}
