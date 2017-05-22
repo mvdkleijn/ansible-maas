@@ -107,16 +107,6 @@ class Inventory:
         tag_list = [item["name"] for item in response]
         return tag_list
 
-    def zones(self):
-        """Fetch a simple list of available zones from MAAS."""
-        headers = self.auth()
-
-        url = "{}/zones/".format(self.maas.rstrip())
-        request = requests.get(url, headers=headers)
-        response = json.loads(request.text)
-        zone_list = [item["name"] for item in response]
-        return zone_list
-
     def tag(self):
         """Fetch detailed information on a particular tag from MAAS."""
         headers = self.auth()
@@ -128,7 +118,6 @@ class Inventory:
     def inventory(self):
         """Look up hosts by tag(s) and zone(s) and return a dict that Ansible will understand as an inventory."""
         tags = self.tags()
-        zones = self.zones()
         ansible = {}
         for tag in tags:
             headers = self.auth()
@@ -144,6 +133,7 @@ class Inventory:
                         "hosts": hosts,
                         "vars": {}
                     }
+
         nodes = self.nodes()
         hosts = []
         for node in nodes:
