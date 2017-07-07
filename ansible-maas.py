@@ -116,10 +116,9 @@ class Inventory:
         return json.loads(request.text)
 
     def inventory(self):
-        """Look up hosts by tag(s) and return a dict that Ansible will understand as an inventory."""
+        """Look up hosts by tag(s) and zone(s) and return a dict that Ansible will understand as an inventory."""
         tags = self.tags()
         ansible = {}
-
         for tag in tags:
             headers = self.auth()
             url = "{}/tags/{}/?op=machines".format(self.maas.rstrip(), tag)
@@ -134,6 +133,18 @@ class Inventory:
                         "hosts": hosts,
                         "vars": {}
                     }
+
+        nodes = self.nodes()
+        hosts = []
+        for node in nodes:
+           zone = node['zone']['name']
+           if node['node_type_name'] != 'Machine' or node['status_name'] != 'Deployed':
+             continue
+           hosts.append(node['fqdn'])
+           ansible[zone] = {
+                "hosts": hosts,       
+                "vars": {}
+           }
         # PS 2015-09-03: Create metadata block for Ansible's Dynamic Inventory
         # The below code gets a dump of ALL nodes in MAAS and then builds out a _meta JSON attribute.
         # node_dump = self.nodes()
