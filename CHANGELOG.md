@@ -1,3 +1,9 @@
+# 2.1.0
+
+Added zone based listing of machines. - Thanks @v92
+
+Prefixed the Ansible groups with "zone-" or "tag-" to prevent naming conflicts.
+
 # 2.0.1
 
 Only return machines that are in "Deployed" status to Ansible. - Thanks @v92

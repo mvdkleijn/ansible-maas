@@ -19,7 +19,7 @@ See https://docs.ubuntu.com/maas/2.1/en/api for API details
 :copyright: Martijn van der kleijn, 2017
 :author: Martijn van der Kleijn <mailto:martijn.niji@gmail.com>
 :license: Released under the Apache 2.0 License. See LICENSE for details.
-:version: 2.0.1
+:version: 2.1.0
 :date: 11 May 2017
 """
 
@@ -41,6 +41,8 @@ class Inventory:
         """Check for precense of mandatory environment variables and route commands."""
         self.supported = '2.0'
         self.apikeydocs = 'https://docs.ubuntu.com/maas/2.1/en/manage-cli#log-in-(required)'
+        # Interface name to connect to
+        self.connectToNodeVia = 'eth1'
 
         self.maas = os.environ.get("MAAS_API_URL", None)
         if not self.maas:
@@ -117,58 +119,54 @@ class Inventory:
 
     def inventory(self):
         """Look up hosts by tag(s) and zone(s) and return a dict that Ansible will understand as an inventory."""
-        tags = self.tags()
-        ansible = {}
-        for tag in tags:
-            headers = self.auth()
-            url = "{}/tags/{}/?op=machines".format(self.maas.rstrip(), tag)
-            request = requests.get(url, headers=headers)
-            response = json.loads(request.text)
-            group_name = tag
-            hosts = []
-            for server in response:
-                if server['status_name'] == 'Deployed':
-                    hosts.append(server['fqdn'])
-                    ansible[group_name] = {
-                        "hosts": hosts,
-                        "vars": {}
-                    }
+        ansible = {
+            '_meta': {
+                'hostvars': {}
+            }
+        }
 
         nodes = self.nodes()
-        hosts = []
+        # hosts = {}
         for node in nodes:
-           zone = node['zone']['name']
-           if node['node_type_name'] != 'Machine' or node['status_name'] != 'Deployed':
-             continue
-           hosts.append(node['fqdn'])
-           ansible[zone] = {
-                "hosts": hosts,       
-                "vars": {}
-           }
-        # PS 2015-09-03: Create metadata block for Ansible's Dynamic Inventory
-        # The below code gets a dump of ALL nodes in MAAS and then builds out a _meta JSON attribute.
-        # node_dump = self.nodes()
-        # nodes = {
-        #     '_meta': {
-        #         'hostvars': {}
-        #     }
-        # }
-        #
-        # for node in node_dump:
-        #     if not node['tag_names']:
-        #         pass
-        #     else:
-        #         nodes['_meta']['hostvars'][node['hostname']] = {
-        #             'mac_address': node['macaddress_set'][0]['mac_address'],
-        #             'system_id': node['system_id'],
-        #             'power_type': node['power_type'],
-        #             'os': node['osystem'],
-        #             'os_release': node['distro_series']
-        #         }
+            # Lets make sure its a Deployed Machines (not a Device)
+            if node['node_type_name'] != 'Machine' or node['status_name'] != 'Deployed':
+                continue
+
+            # Add metadata on node
+            # interfaces = node['interface_set']
+            # for interface in interfaces:
+            #     if interface['name'] == self.connectToNodeVia:
+            #         ansible['_meta']['hostvars'][node['fqdn']] = {
+            #             'ansible_host': interface
+            #         }
+            ansible['_meta']['hostvars'][node['fqdn']] = {
+                'ansible_host': node['ip_addresses']
+            }
+
+
+            # Add Zones and their machines
+            zone = "zone-" + node['zone']['name']
+            try:
+                ansible[zone]['hosts'].append(node['fqdn'])
+            except (KeyError, IndexError, AttributeError) as e:
+                ansible[zone] = {
+                    "hosts": [node['fqdn']],
+                    "vars": {}
+                }
+
+            # Add Tags and their machines
+            for tag in node['tag_names']:
+                tag = "tag-" + tag
+                try:
+                    ansible[tag]['hosts'].append(node['fqdn'])
+                except (KeyError, IndexError, AttributeError) as e:
+                    ansible[tag] = {
+                    "hosts": [node['fqdn']],
+                    "vars": {}
+                    }
 
         # Need to merge ansible and nodes dict()s as a shallow copy, or Ansible shits itself and throws an error
         result = ansible.copy()
-        # result.update(nodes)
         return result
 
     def nodes(self):
