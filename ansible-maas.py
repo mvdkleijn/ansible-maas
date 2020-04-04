@@ -64,11 +64,11 @@ class Inventory:
         elif self.args.tag:
             print json.dumps(self.tag(), sort_keys=True, indent=2)
         elif self.args.supported:
-            print self.supported()
+            print self.supportedVersion()
         else:
             sys.exit(1)
 
-    def supported(self):
+    def supportedVersion(self):
         """Display MAAS API version supported by this tool."""
         return self.supported
 
