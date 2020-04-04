@@ -182,7 +182,7 @@ class Inventory:
     def cli_handler(self):
         """Manage command line options and arguments."""
         parser = argparse.ArgumentParser(description='Dynamically produce an Ansible inventory from Ubuntu MAAS.', add_help=False)
-        parser.add_argument('-l', '--list', action='store_true', help='List instances by tag. (default)')
+        parser.add_argument('-l', '--list', action='store_true', help='List instances by tag.')
         parser.add_argument('-h', '--host', action='store', help='Get variables relating to a specific instance.')
         parser.add_argument('-n', '--nodes', action='store_true', help='List all nodes registered under MAAS.')
         parser.add_argument('-t', '--tags', action='store_true', help='List all tags registered under MAAS.')
