@@ -1,3 +1,5 @@
+# MIGRATED TO https://opencommit.eu/mvdkleijn/ansible-maas
+
 # ansible-maas
 
 An Ansible Dynamic Inventory Script for the Ubuntu MAAS 2.0 API.
